@@ -59,7 +59,7 @@ vjs.withConfig = function(options, tag, addOptions, oldReady) {
   }
 };
 
-vjs.Config = vjs.Class.extend({
+vjs.Config = vjs.CoreObject.extend({
   init: function(player, data, options) {
     this.player = player;
     this.data = data;
