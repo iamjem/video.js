@@ -75,12 +75,12 @@ vjs.Tracking =  vjs.CoreObject.extend({
     this.removeProfiles();
 
     var player = this.player,
-        current = player.config.getCurrent();
+        current = player.config_.getCurrent();
     
     player.off('timeupdate', this.onTimeupdate);
 
     if (current !== null && current.components) {
-      var profiles = player.config.getCurrentComponents('tracking.profiles');
+      var profiles = player.config_.getCurrentComponents('tracking.profiles');
       if (profiles !== null) {
         profiles = this.initProfiles(profiles);
         this.addProfiles(profiles);
@@ -486,5 +486,5 @@ Tracking.registerProfile('ga', vjs.Tracking.GATrackingProfile);
 
 // register tracking plugin
 vjs.plugin('tracking', function(options){
-    return new vjs.Tracking(this, options);
+    this.tracking_ = new vjs.Tracking(this, options);
 });
