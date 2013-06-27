@@ -123,7 +123,7 @@ vjs.Tracking.getProfile = function(name) {
 };
 
 vjs.Tracking.registerProfile = function(name, profile) {
-  Tracking.profiles_[name] = profile;
+  vjs.Tracking.profiles_[name] = profile;
 };
 
 vjs.Tracking.expandTimecode = function(duration, timecode) {
@@ -454,7 +454,7 @@ vjs.Tracking.WebtrendsTrackingProfile.prototype.options_ = {
   }
 };
 
-Tracking.registerProfile('webtrends', vjs.Tracking.WebtrendsTrackingProfile);
+vjs.Tracking.registerProfile('webtrends', vjs.Tracking.WebtrendsTrackingProfile);
 
 // Google analytics profile
 vjs.Tracking.GATrackingProfile = vjs.Tracking.TrackingProfile.extend({
@@ -482,7 +482,7 @@ vjs.Tracking.GATrackingProfile.prototype.options_ = {
   }
 };
 
-Tracking.registerProfile('ga', vjs.Tracking.GATrackingProfile);
+vjs.Tracking.registerProfile('ga', vjs.Tracking.GATrackingProfile);
 
 // register tracking plugin
 vjs.plugin('tracking', function(options){
