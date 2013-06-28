@@ -16,7 +16,7 @@ vjs.Tracking =  vjs.CoreObject.extend({
     }
     this.onTimeupdate = vjs.bind(this, this.onTimeupdate);
     this.player.on('loadstart', vjs.bind(this, this.onLoadstart));
-    this.player.on('dispose', vjs.bind(this, this.onDestroy));
+    this.player.on('dispose', vjs.bind(this, this.onDispose));
   },
 
   addProfiles: function(profiles, global) {
@@ -102,7 +102,7 @@ vjs.Tracking =  vjs.CoreObject.extend({
     }
   },
 
-  onDestroy: function(){
+  onDispose: function(){
     this.removeProfiles();
     this.removeProfiles(true);
   }
