@@ -5,6 +5,7 @@ vjs.Tracking =  vjs.CoreObject.extend({
     this.options_ = vjs.obj.copy(this.options_);
     options = vjs.Component.prototype.options.call(this, options);
 
+    this.lastTimeupdate_ = null;
     this.activeProfiles_ = [];
     this.globalProfiles_ = [];
     
@@ -72,12 +73,11 @@ vjs.Tracking =  vjs.CoreObject.extend({
   },
 
   onLoadstart: function(e) {
+    player.off('timeupdate', this.onTimeupdate);
     this.removeProfiles();
 
     var player = this.player,
         current = player.config_.getCurrent();
-    
-    player.off('timeupdate', this.onTimeupdate);
 
     if (current !== null && current.components) {
       var profiles = player.config_.getCurrentComponents('tracking.profiles');
@@ -93,8 +93,8 @@ vjs.Tracking =  vjs.CoreObject.extend({
   // throttle special timeupdate events across active profiles
   onTimeupdate: function(e) {
     var curr = Math.round(this.player.currentTime());
-    if (this.lastTimeupdate !== curr) {
-      this.lastTimeupdate = curr;
+    if (this.lastTimeupdate_ !== curr) {
+      this.lastTimeupdate_ = curr;
       var profiles = [].concat(this.activeProfiles_, this.globalProfiles_);
       for (var i = 0, l = profiles.length; i < l; i++) {
         profiles[i].trigger('timeupdate.' + curr, e);
@@ -167,11 +167,11 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
     this.el = document.createElement('div');
 
     this.proxies = {};
-    
+
     var events = this.options.events,
         safeEvents = {},
         timeEvents = this.timeEvents = {};
-    
+
     for (var key in events) {
       if (/^timeupdate\./.test(key)) {
         timeEvents[key] = events[key];
