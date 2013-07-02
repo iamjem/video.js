@@ -1,6 +1,6 @@
 vjs.Tracking =  vjs.CoreObject.extend({
   init: function(player, options) {
-    this.player = player;
+    this.player_ = player;
 
     this.options_ = vjs.obj.copy(this.options_);
     options = vjs.Component.prototype.options.call(this, options);
@@ -15,9 +15,10 @@ vjs.Tracking =  vjs.CoreObject.extend({
       profiles = this.globalProfiles_ = this.initProfiles(profiles);
       this.addProfiles(profiles, true);
     }
+
     this.onTimeupdate = vjs.bind(this, this.onTimeupdate);
-    this.player.on('loadstart', vjs.bind(this, this.onLoadstart));
-    this.player.on('dispose', vjs.bind(this, this.onDispose));
+    this.player_.on('loadstart', vjs.bind(this, this.onLoadstart));
+    this.player_.on('dispose', vjs.bind(this, this.onDispose));
   },
 
   addProfiles: function(profiles, global) {
@@ -53,7 +54,7 @@ vjs.Tracking =  vjs.CoreObject.extend({
   // take raw profile options, initialize profile class, returns profile objects
   initProfiles: function(profileData) {
     var profiles = [],
-        player = this.player,
+        player = this.player_,
         p, pClass;
 
     for (var i = 0, l = profileData.length; i < l; i++) {
@@ -76,11 +77,11 @@ vjs.Tracking =  vjs.CoreObject.extend({
     player.off('timeupdate', this.onTimeupdate);
     this.removeProfiles();
 
-    var player = this.player,
+    var player = this.player_,
         current = player.config_.getCurrent();
 
     if (current !== null && current.components) {
-      var profiles = player.config_.getCurrentComponents('tracking.profiles');
+      var profiles = player.config_.getCurrentConfig('tracking.profiles');
       if (profiles !== null) {
         profiles = this.initProfiles(profiles);
         this.addProfiles(profiles);
@@ -92,7 +93,7 @@ vjs.Tracking =  vjs.CoreObject.extend({
   },
   // throttle special timeupdate events across active profiles
   onTimeupdate: function(e) {
-    var curr = Math.round(this.player.currentTime());
+    var curr = Math.round(this.player_.currentTime());
     if (this.lastTimeupdate_ !== curr) {
       this.lastTimeupdate_ = curr;
       var profiles = [].concat(this.activeProfiles_, this.globalProfiles_);
@@ -159,7 +160,7 @@ vjs.Tracking.expandTime = function(duration, time) {
 // TrackingProfile
 vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
   init: function(player, options) {
-    this.player = player;
+    this.player_ = player;
 
     this.options_ = vjs.obj.copy(this.options_);
     options = vjs.Component.prototype.options.call(this, options);
@@ -238,7 +239,7 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
   },
 
   setupTimeupdates: function() {
-    var player = this.player;
+    var player = this.player_;
     player.off('loadedmetadata', this.onLoadedmetadata);
     var events = this.timeEvents,
         duration = player.duration(),
@@ -299,7 +300,7 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
   },
   // binds event proxies
   bind: function() {
-    var player = this.player;
+    var player = this.player_;
     
     this.unbind();
 
@@ -320,7 +321,7 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
   },
   // unbinds event proxies
   unbind: function() {
-    var player = this.player,
+    var player = this.player_,
         proxies = this.proxies;
     
     player.off('loadedmetadata', this.onLoadedmetadata);
@@ -364,7 +365,7 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
     // if we don't explicitly stop omniture, it will
     // continue making tracking calls after player is gone
     var title = this.options.context.title;
-    s.Media.stop(title, parseInt(this.player.currentTime(), 10));
+    s.Media.stop(title, parseInt(this.player_.currentTime(), 10));
     s.Media.close(title);
     return this;
   },
@@ -383,13 +384,13 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
         s.events='';
         // and start tracking video
         this.playing = true;
-        s.Media.open(context.title, this.player.duration(), context.fileName);
+        s.Media.open(context.title, this.player_.duration(), context.fileName);
         s.Media.play(context.title, 0);
       });
       // flash won't have the duration available when playback begins
-      if (!this.player.duration()) {
-        this.player.on('durationchange', this.delayPlay || (this.delayPlay = vjs.bind(this, function(){
-          this.player.off('durationchange', this.delayPlay);
+      if (!this.player_.duration()) {
+        this.player_.on('durationchange', this.delayPlay || (this.delayPlay = vjs.bind(this, function(){
+          this.player_.off('durationchange', this.delayPlay);
           playCB();
         })));
       }
@@ -399,16 +400,16 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
     }
     else {
       // resume
-      this.player.on('timeupdate', this.trackResume || (this.trackResume = vjs.bind(this, function(){
-        this.player.off('timeupdate', this.trackResume);
-        s.Media.play(context.title, parseInt(this.player.currentTime(), 10));
+      this.player_.on('timeupdate', this.trackResume || (this.trackResume = vjs.bind(this, function(){
+        this.player_.off('timeupdate', this.trackResume);
+        s.Media.play(context.title, parseInt(this.player_.currentTime(), 10));
       })));
     }
   },
 
   handlePause: function(event, context) {
-    if (!this.player.ended()) {
-      this.pausedAt = parseInt(this.player.currentTime(), 10);
+    if (!this.player_.ended()) {
+      this.pausedAt = parseInt(this.player_.currentTime(), 10);
       s.Media.stop(context.title, this.pausedAt);
     }
   },
@@ -417,7 +418,7 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
     // finish
     this.playing = false;
     this.pausedAt = null;
-    s.Media.stop(context.title, parseInt(this.player.currentTime(), 10));
+    s.Media.stop(context.title, parseInt(this.player_.currentTime(), 10));
     s.Media.close(context.title);
   }
 });
