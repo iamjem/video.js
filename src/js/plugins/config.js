@@ -1,4 +1,11 @@
-vjs.withConfig = function(options, tag, addOptions, oldReady) {
+vjs.ConfigPlayer = vjs.Player.extend({
+  init: function(configFactory, tag, options, ready){
+    this.config_ = configFactory(this);
+    vjs.Player.prototype.init.call(this, tag, options, ready);
+  }
+});
+
+vjs.withConfig = function(options, tag, addOptions, ready) {
   options = vjs.obj.merge({
     url: null,
     data: null,
@@ -7,30 +14,30 @@ vjs.withConfig = function(options, tag, addOptions, oldReady) {
     onData: function(data){return data;},
     configOptions: {}
   }, options);
-  
-  // ensure addOptions exists
-  if (!addOptions) {
-    addOptions = {};
-  }
 
+  // ensure minimal addOptions
+  addOptions = vjs.obj.merge({
+    children: {},
+    plugins: {}
+  }, addOptions || {});
+
+  // ajax success callback
   var success = function(data) {
     data = options.onData(data);
-    
-    var ready = function() {
-      this.config_ = new vjs.Config(this, data, options.configOptions);
-      if (oldReady) oldReady.call(this);
-    };
 
-    // merge global component data into addOptions components
-    if (data.components) {
-      if (!addOptions.children) addOptions.children = {};
-      vjs.obj.merge(addOptions.children, vjs.Config.matchComponents(data.components));
+    // merge global components into addOptions
+    if (data.children) {
+      vjs.obj.merge(addOptions.children, vjs.Config.matchOptions(data.children));
     }
-    
-    // merge start video data, MINUS components
+
+    // merge global plugins into addOptions
+    if (data.plugins) {
+      vjs.obj.merge(addOptions.plugins, vjs.Config.matchOptions(data.plugins));
+    }
+
+    // merge start video options
     if (options.defaultId !== null && data.videos) {
-      var videos = data.videos,
-          v;
+      var videos = data.videos, v;
       for (var i = 0, l = videos.length; i < l; i++) {
         v = videos[i];
         if (v.id === options.defaultId) {
@@ -45,13 +52,16 @@ vjs.withConfig = function(options, tag, addOptions, oldReady) {
       }
     }
 
-    var player = vjs(tag, addOptions, ready);
+    var configFactory = vjs.Config.configFactory(data);
+    var player = new vjs.ConfigPlayer(configFactory, tag, addOptions, ready);
     options.onPlayer(player);
   };
 
+  // data was manually passed in
   if (options.data !== null) {
     success(options.data);
   }
+  // data requires AJAX get
   else if (options.url !== null) {
     vjs.get(options.url, function(responseText){
       success(JSON.parse(responseText));
@@ -60,22 +70,25 @@ vjs.withConfig = function(options, tag, addOptions, oldReady) {
 };
 
 vjs.Config = vjs.CoreObject.extend({
-  init: function(player, data, options) {
+  init: function(player, options) {
     this.player = player;
-    this.data = data;
-    data.videos = data.videos || [];
+    this.options_ = vjs.obj.deepMerge(this.options_, options || {});
+    this.data = this.options_.data;
     this.buildCache();
     return this;
   },
   buildCache: function() {
     // create ID cache
-    var videos    = this.data.videos,
-      idCache   = this.idCache_ = {},
-      srcCache  = this.srcCache_ = {},
-      cmpCache  = this.cmpCache_ = {};
-    
-    var video, i, l, srcs, src, j, k;
-    for (i = 0, l = videos.length; i < l; i++) {
+    var videos = this.data.videos,
+        idCache = this.idCache_ = {},
+        srcCache = this.srcCache_ = {};
+
+    var video,
+        i = 0, l = videos.length,
+        j, k,
+        srcs, src;
+
+    for (; i < l; i++) {
       video = videos[i];
       if (video.hasOwnProperty('id')) {
         idCache[video.id] = i;
@@ -85,18 +98,12 @@ vjs.Config = vjs.CoreObject.extend({
             srcCache[srcs[j].src] = i;
           }
         }
-        // evaluate potential component media queries immediately
-        // there's no way to swap or reload instantiated components
-        // so we can't have totally 'responsive' components
-        if (video.hasOwnProperty('components')) {
-          cmpCache[video.id] = vjs.Config.matchComponents(video.components);
-        }
       }
       else {
         vjs.log('Missing "id" attribute on a config\'s video object.');
       }
     }
-    
+
     return this;
   },
   // get video data by id
@@ -113,28 +120,40 @@ vjs.Config = vjs.CoreObject.extend({
   getCurrent: function() {
     return this.getBySrc(this.player.currentSrc());
   },
-  // get current video components, optionally pass property selector
-  // to drill down further, ie: 'someComponent.someProp.anotherProp'
-  getCurrentComponents: function(propSelector){
-    var curr = this.getCurrent(),
-        components = (curr !== null && curr.hasOwnProperty('components')) ? this.cmpCache_[curr.id] : null;
-    
-    if (components !== null && propSelector !== undefined) {
-      var prop;
-      propSelector = propSelector.split('.');
-      for (var i = 0, l = propSelector.length; i < l; i++) {
-        prop = propSelector[i];
-        if (components.hasOwnProperty(prop)) {
-          components = components[prop];
-          continue;
-        }
-        else {
-          components = null;
-          break;
-        }
+
+  getOptions_: function(obj, selector){
+    var selected = obj, prop;
+    selector = selector.split('.');
+
+    for (var i = 0, l = selector.length; i < l; i++) {
+      prop = selector[i];
+      if (selected.hasOwnProperty(prop)) {
+        selected = selected[prop];
+        continue;
+      }
+      else {
+        selected = null;
+        break;
       }
     }
-    return components;
+    
+    return selected;
+  },
+
+  getCurrentChildren: function(selector){
+    var curr = this.getCurrent();
+    if (curr !== null && curr.hasOwnProperty('children')) {
+      return (selector) ? this.getOptions_(curr.children, selector) : curr.children;
+    }
+    return null;
+  },
+
+  getCurrentConfig: function(selector){
+    var curr = this.getCurrent();
+    if (curr !== null && curr.hasOwnProperty('config')) {
+      return (selector) ? this.getOptions_(curr.config, selector) : curr.config;
+    }
+    return null;
   },
 
   loadVideoById: function(id){
@@ -146,18 +165,35 @@ vjs.Config = vjs.CoreObject.extend({
   
 });
 
-// choose the right components based on media queries
-vjs.Config.matchComponents = function(components) {
-  if (!window.matchMedia || !components.hasOwnProperty('default')) {
-    return components['default'] || components;
+vjs.Config.prototype.options_ = {
+  data: {
+    videos: []
   }
-  for (var query in components) {
+};
+
+vjs.Config.configFactory = function(options){
+  return function(player){
+    return new vjs.Config(player, options);
+  };
+};
+
+// choose the right options based on media queries
+vjs.Config.matchOptions = function(obj) {
+  if (!window.matchMedia || !obj.hasOwnProperty('default')) {
+    return obj['default'] || obj;
+  }
+  for (var query in obj) {
     if (window.matchMedia(query).matches) {
-      return components[query];
+      return obj[query];
     }
   }
-  return components['default'];
+  return obj['default'];
 };
+
+// register plugin
+vjs.plugin('config', function(options){
+  this.config_ = new vjs.Config(this, options);
+});
 
 vjs.ConfigPosterImage = vjs.PosterImage.extend({
   init: function(player, options){
@@ -180,9 +216,4 @@ vjs.ConfigPosterImage = vjs.PosterImage.extend({
     }
     this.player.play();
   }
-});
-
-// register plugin
-vjs.plugin('config', function(options){
-  this.config_ = new vjs.Config(this, options);
 });
