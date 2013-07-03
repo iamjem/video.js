@@ -1,4 +1,4 @@
-vjs.Tracking =  vjs.CoreObject.extend({
+vjs.Tracking =  vjs.Component.extend({
   init: function(player, options) {
     this.player_ = player;
 
@@ -18,13 +18,15 @@ vjs.Tracking =  vjs.CoreObject.extend({
 
     this.onTimeupdate = vjs.bind(this, this.onTimeupdate);
     this.player_.on('loadstart', vjs.bind(this, this.onLoadstart));
+    this.player_.on('play', vjs.bind(this, this.onPlay));
     this.player_.on('dispose', vjs.bind(this, this.onDispose));
   },
 
   addProfiles: function(profiles, global) {
     for (var i = 0, l = profiles.length; i < l; i++) {
       profiles[i].bind();
-    }    
+      profiles[i].trigger('play');
+    }
     if (global === undefined) {
       this.activeProfiles_ = this.activeProfiles_.concat(profiles);
     }
@@ -43,11 +45,11 @@ vjs.Tracking =  vjs.CoreObject.extend({
     else {
       profiles = this.globalProfiles_;
       for (var i = 0, l = profiles.length; i < l; i++) {
-        profiles[i].cleanup();
+        profiles[i].dispose();
       }
       this.globalProfiles_ = [];
     }
-    
+
     return this;
   },
 
@@ -74,18 +76,21 @@ vjs.Tracking =  vjs.CoreObject.extend({
   },
 
   onLoadstart: function(e) {
-    player.off('timeupdate', this.onTimeupdate);
+    this.player_.off('timeupdate', this.onTimeupdate);
+  },
+
+  onPlay: function(e) {
+    this.player_.off('timeupdate', this.onTimeupdate);
+
     this.removeProfiles();
 
     var player = this.player_,
-        current = player.config_.getCurrent();
+        current = player.config_.getCurrent(),
+        profiles = player.config_.getCurrentConfig('tracking.profiles');
 
-    if (current !== null && current.components) {
-      var profiles = player.config_.getCurrentConfig('tracking.profiles');
-      if (profiles !== null) {
-        profiles = this.initProfiles(profiles);
-        this.addProfiles(profiles);
-      }
+    if (current !== null && profiles !== null) {
+      profiles = this.initProfiles(profiles);
+      this.addProfiles(profiles);
       player.on('timeupdate', this.onTimeupdate);
     }
 
@@ -138,7 +143,7 @@ vjs.Tracking.expandTimecode = function(duration, timecode) {
     }
     else {
       expanded = this.expandTime(parseInt(duration, 10), timecode[1]);
-    }      
+    }
     expanded = Math.min(duration, expanded);
   }
 
@@ -230,9 +235,11 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
 
     var proxies = this.proxies;
     vjs.obj.each(eTypes, function(type){
-      if (!proxies[type]) proxies[type] = vjs.bind(this, function(e){
-        this.trigger(type, e);
-      });
+      if (!proxies[type]) {
+        proxies[type] = vjs.bind(this, function(e){
+          this.trigger(type, e);
+        });
+      }
     }, this);
 
     return this;
@@ -240,7 +247,9 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
 
   setupTimeupdates: function() {
     var player = this.player_;
+
     player.off('loadedmetadata', this.onLoadedmetadata);
+
     var events = this.timeEvents,
         duration = player.duration(),
         newEvents = {},
@@ -260,7 +269,7 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
           vjs.log('Could not match timecode: ' + timeParts);
           continue;
         }
-        
+
         // make sure there's no unexpected behavior with handle names
         context = [].concat(events[type]);
         handleName = 'handleTimeupdate.' + timeParts;
@@ -281,7 +290,7 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
       }
     }
     this.setupHandlers(newEvents);
-  },  
+  },
 
   // event methods
   on: function(type, fn, uid){
@@ -301,7 +310,7 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
   // binds event proxies
   bind: function() {
     var player = this.player_;
-    
+
     this.unbind();
 
     var proxies = this.proxies;
@@ -316,14 +325,14 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
     else {
       player.on('loadedmetadata', this.onLoadedmetadata);
     }
-    
+
     return this;
   },
   // unbinds event proxies
   unbind: function() {
     var player = this.player_,
         proxies = this.proxies;
-    
+
     player.off('loadedmetadata', this.onLoadedmetadata);
 
     for (var key in proxies) {
@@ -484,8 +493,3 @@ vjs.Tracking.GATrackingProfile.prototype.options_ = {
 };
 
 vjs.Tracking.registerProfile('ga', vjs.Tracking.GATrackingProfile);
-
-// register tracking plugin
-vjs.plugin('tracking', function(options){
-    this.tracking_ = new vjs.Tracking(this, options);
-});
