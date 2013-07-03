@@ -52,7 +52,7 @@ vjs.withConfig = function(options, tag, addOptions, ready) {
       }
     }
 
-    var configFactory = vjs.Config.configFactory(data);
+    var configFactory = vjs.Config.configFactory({ data: data });
     var player = new vjs.ConfigPlayer(configFactory, tag, addOptions, ready);
     options.onPlayer(player);
   };
