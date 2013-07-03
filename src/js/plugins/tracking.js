@@ -1,16 +1,14 @@
 vjs.Tracking =  vjs.Component.extend({
   init: function(player, options) {
-    this.player_ = player;
-
-    this.options_ = vjs.obj.copy(this.options_);
-    options = vjs.Component.prototype.options.call(this, options);
-
+    vjs.Component.prototype.init.call(this, player, options);
+    
+    this.currId_ = null;
     this.lastTimeupdate_ = null;
     this.activeProfiles_ = [];
     this.globalProfiles_ = [];
     
     // handle global profiles
-    var profiles = this.options.profiles;
+    var profiles = this.options_.profiles;
     if (profiles.length) {
       profiles = this.globalProfiles_ = this.initProfiles(profiles);
       this.addProfiles(profiles, true);
@@ -77,24 +75,27 @@ vjs.Tracking =  vjs.Component.extend({
 
   onLoadstart: function(e) {
     this.player_.off('timeupdate', this.onTimeupdate);
+    this.removeProfiles();
+    this.lastTimeupdate_ = null;
   },
 
   onPlay: function(e) {
-    this.player_.off('timeupdate', this.onTimeupdate);
-
-    this.removeProfiles();
-
     var player = this.player_,
-        current = player.config_.getCurrent(),
-        profiles = player.config_.getCurrentConfig('tracking.profiles');
+        current = player.config_.getCurrent();
 
-    if (current !== null && profiles !== null) {
+    if (current === null || current.id === this.currId_) {
+        return this;
+    }
+
+    this.currId_ = current.id;
+    
+    var profiles = player.config_.getCurrentConfig('tracking.profiles');
+
+    if (profiles !== null) {
       profiles = this.initProfiles(profiles);
       this.addProfiles(profiles);
       player.on('timeupdate', this.onTimeupdate);
     }
-
-    return this;
   },
   // throttle special timeupdate events across active profiles
   onTimeupdate: function(e) {
@@ -174,7 +175,7 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
 
     this.proxies = {};
 
-    var events = this.options.events,
+    var events = this.options_.events,
         safeEvents = {},
         timeEvents = this.timeEvents = {};
 
@@ -351,9 +352,9 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
   handleNoop: function(event, context) {},
  
   // wraps handlers, passes them the event and context
-  proxyHandler: function(handleName, context) {
+  bindHandler: function(handleName, context) {
     // merge global context into context object
-    var context_ = vjs.obj.merge({}, this.options.context);
+    var context_ = vjs.obj.merge({}, this.options_.context);
     context = vjs.obj.merge(context_, context);
     return function(event) {
       this[handleName].call(this, event, context);
@@ -373,7 +374,7 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
     vjs.Tracking.TrackingProfile.prototype.dispose.call(this);
     // if we don't explicitly stop omniture, it will
     // continue making tracking calls after player is gone
-    var title = this.options.context.title;
+    var title = this.options_.context.title;
     s.Media.stop(title, parseInt(this.player_.currentTime(), 10));
     s.Media.close(title);
     return this;
