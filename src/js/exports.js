@@ -133,3 +133,15 @@ goog.exportSymbol('videojs.autoSetup', vjs.autoSetup);
 goog.exportSymbol('videojs.plugin', vjs.plugin);
 
 goog.exportSymbol('videojs.createTimeRange', vjs.createTimeRange);
+
+goog.exportSymbol('videojs.ConfigPlayer', vjs.ConfigPlayer);
+goog.exportSymbol('videojs.withConfig', vjs.withConfig);
+goog.exportSymbol('videojs.Config', vjs.Config);
+goog.exportProperty(vjs.Config.prototype, 'getById', vjs.Config.prototype.getById);
+goog.exportProperty(vjs.Config.prototype, 'getBySrc', vjs.Config.prototype.getBySrc);
+goog.exportProperty(vjs.Config.prototype, 'getCurrent', vjs.Config.prototype.getCurrent);
+goog.exportProperty(vjs.Config.prototype, 'getCurrentChildren', vjs.Config.prototype.getCurrentChildren);
+goog.exportProperty(vjs.Config.prototype, 'getCurrentConfig', vjs.Config.prototype.getCurrentConfig);
+goog.exportProperty(vjs.Config.prototype, 'loadVideoById', vjs.Config.prototype.loadVideoById);
+goog.exportProperty('videojs.Config.configFactory', vjs.Config.configFactory);
+goog.exportSymbol('videojs.ConfigPosterImage', vjs.ConfigPosterImage);
