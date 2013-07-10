@@ -144,10 +144,10 @@ goog.exportProperty(vjs.Tracking, 'expandTimecode', vjs.Tracking.expandTimecode)
 goog.exportProperty(vjs.Tracking, 'expandPercent', vjs.Tracking.expandPercent);
 goog.exportProperty(vjs.Tracking, 'expandTime', vjs.Tracking.expandTime);
 
-goog.exportSymbol('videojs.TrackingProfile', vjs.TrackingProfile);
-goog.exportProperty(vjs.TrackingProfile.prototype, 'setupHandlers', vjs.TrackingProfile.prototype.setupHandlers);
-goog.exportProperty(vjs.TrackingProfile.prototype, 'setupTimeupdates', vjs.TrackingProfile.prototype.setupTimeupdates);
-goog.exportProperty(vjs.TrackingProfile.prototype, 'bindHandler', vjs.TrackingProfile.prototype.bindHandler);
+goog.exportSymbol('videojs.Tracking.TrackingProfile', vjs.Tracking.TrackingProfile);
+goog.exportProperty(vjs.Tracking.TrackingProfile.prototype, 'setupHandlers', vjs.Tracking.TrackingProfile.prototype.setupHandlers);
+goog.exportProperty(vjs.Tracking.TrackingProfile.prototype, 'setupTimeupdates', vjs.Tracking.TrackingProfile.prototype.setupTimeupdates);
+goog.exportProperty(vjs.Tracking.TrackingProfile.prototype, 'bindHandler', vjs.Tracking.TrackingProfile.prototype.bindHandler);
 
 goog.exportSymbol('videojs.OmnitureTrackingProfile', vjs.OmnitureTrackingProfile);
 goog.exportSymbol('videojs.WebtrendsTrackingProfile', vjs.WebtrendsTrackingProfile);
