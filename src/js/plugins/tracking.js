@@ -123,6 +123,8 @@ vjs.Tracking.prototype.options_ = {
 // static
 vjs.Tracking.profiles_ = {};
 
+vjs.Tracking.Events = 'loadstart,abort,error,emptied,stalled,loadedmetadata,loadeddata,canplay,canplaythrough,playing,waiting,seeking,seeked,ended,durationchange,play,pause,ratechange,volumechange'.split(',');
+
 vjs.Tracking.timeRE = /^(-?\d+(\.\d+)?)(%)?$/;
 
 vjs.Tracking.getProfile = function(name) {
@@ -171,9 +173,8 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
     this.options_ = vjs.obj.copy(this.options_);
     options = vjs.Component.prototype.options.call(this, options);
 
-    this.el = document.createElement('div');
-
-    this.proxies = {};
+    this.el_ = document.createElement('div');
+    this.eventHandler = vjs.bind(this, this.eventHandler);
 
     var events = this.options_.events,
         safeEvents = {},
@@ -234,15 +235,6 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
       if (type.indexOf('.') === -1) eTypes[type] = 1;
     }
 
-    var proxies = this.proxies;
-    vjs.obj.each(eTypes, function(type){
-      if (!proxies[type]) {
-        proxies[type] = vjs.bind(this, function(e){
-          this.trigger(type, e);
-        });
-      }
-    }, this);
-
     return this;
   },
 
@@ -294,18 +286,23 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
   },
 
   // event methods
+  eventHandler: function (e) {
+      this.trigger(e);
+      e.stopPropagation();
+  },
+
   on: function(type, fn, uid){
-    vjs.on(this.el, type, vjs.bind(this, fn));
+    vjs.on(this.el_, type, vjs.bind(this, fn));
     return this;
   },
 
   off: function(type, fn){
-    vjs.off(this.el, type, fn);
+    vjs.off(this.el_, type, fn);
     return this;
   },
 
   trigger: function(type, e){
-    vjs.trigger(this.el, type, e);
+    vjs.trigger(this.el_, type, e);
     return this;
   },
   // binds event proxies
@@ -314,9 +311,9 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
 
     this.unbind();
 
-    var proxies = this.proxies;
-    for (var key in proxies) {
-      player.on(key, proxies[key]);
+    var events = vjs.Tracking.Events;
+    for (var i = events.length - 1; i >= 0; i--) {
+        player.on(events[i], this.eventHandler);
     }
 
     // if we missed loadedmetadata
@@ -331,14 +328,15 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
   },
   // unbinds event proxies
   unbind: function() {
-    var player = this.player_,
-        proxies = this.proxies;
+    var player = this.player_;
 
     player.off('loadedmetadata', this.onLoadedmetadata);
 
-    for (var key in proxies) {
-      player.off(key, proxies[key]);
+    var events = vjs.Tracking.Events;
+    for (var i = events.length - 1; i >= 0; i--) {
+        player.off(events[i], this.eventHandler);
     }
+
     return this;
   },
 
