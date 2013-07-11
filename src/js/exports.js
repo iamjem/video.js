@@ -143,6 +143,7 @@ goog.exportProperty(vjs.Tracking, 'registerProfile', vjs.Tracking.registerProfil
 goog.exportProperty(vjs.Tracking, 'expandTimecode', vjs.Tracking.expandTimecode);
 goog.exportProperty(vjs.Tracking, 'expandPercent', vjs.Tracking.expandPercent);
 goog.exportProperty(vjs.Tracking, 'expandTime', vjs.Tracking.expandTime);
+goog.exportProperty(vjs.Tracking, 'Events', vjs.Tracking.Events);
 
 goog.exportSymbol('videojs.Tracking.TrackingProfile', vjs.Tracking.TrackingProfile);
 goog.exportProperty(vjs.Tracking.TrackingProfile.prototype, 'setupHandlers', vjs.Tracking.TrackingProfile.prototype.setupHandlers);
