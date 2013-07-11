@@ -174,7 +174,7 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
     options = vjs.Component.prototype.options.call(this, options);
 
     this.el_ = document.createElement('div');
-    this.eventHandler = vjs.bind(this, this.eventHandler);
+    this.eventHandlers_ = {};
 
     var events = this.options_.events,
         safeEvents = {},
@@ -311,9 +311,13 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
 
     this.unbind();
 
+    var handlers = this.eventHandlers_;
     var events = vjs.Tracking.Events;
     for (var i = events.length - 1; i >= 0; i--) {
-        player.on(events[i], this.eventHandler);
+        handlers[events[i]] = vjs.bind(this, function (e) {
+            this.eventHandler.call(this, e);
+        });
+        player.on(events[i], handlers[events[i]]);
     }
 
     // if we missed loadedmetadata
@@ -332,9 +336,10 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
 
     player.off('loadedmetadata', this.onLoadedmetadata);
 
+    var handlers = this.eventHandlers_;
     var events = vjs.Tracking.Events;
     for (var i = events.length - 1; i >= 0; i--) {
-        player.off(events[i], this.eventHandler);
+        player.off(events[i], handlers[events[i]]);
     }
 
     return this;
