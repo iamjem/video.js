@@ -123,8 +123,6 @@ vjs.Tracking.prototype.options_ = {
 // static
 vjs.Tracking.profiles_ = {};
 
-vjs.Tracking.Events = 'loadstart,abort,error,emptied,stalled,loadedmetadata,loadeddata,canplay,canplaythrough,playing,waiting,seeking,seeked,ended,durationchange,play,pause,ratechange,volumechange'.split(',');
-
 vjs.Tracking.timeRE = /^(-?\d+(\.\d+)?)(%)?$/;
 
 vjs.Tracking.getProfile = function(name) {
@@ -174,7 +172,9 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
     options = vjs.Component.prototype.options.call(this, options);
 
     this.el_ = document.createElement('div');
-    this.eventHandlers_ = {};
+    
+    this.eventHandlers_ = [];
+    this.customEventHandlers_ = [];
 
     var events = this.options_.events,
         safeEvents = {},
@@ -203,8 +203,8 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
   },
   
   setupHandlers: function(events) {
-    // keep track of event types used
-    var eTypes = {};
+    var handlers = this.eventHandlers_,
+        customHandlers = this.customEventHandlers_;
     
     var type,
         contexts,
@@ -229,10 +229,19 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
           vjs.log('Missing handler for event type: ' + type);
         }
 
-        this.on(type, this.bindHandler(handleName, c));
+        if (type.indexOf('.') === -1) {
+          handlers.push([
+            type,
+            this.bindHandler(handleName, c)
+          ]);
+        }
+        else {
+          customHandlers.push([
+            type,
+            this.bindHandler(handleName, c)
+          ]);
+        }
       }
-      // use this later, ignore special events
-      if (type.indexOf('.') === -1) eTypes[type] = 1;
     }
 
     return this;
@@ -285,12 +294,6 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
     this.setupHandlers(newEvents);
   },
 
-  // event methods
-  eventHandler: function (e) {
-      this.trigger(e);
-      e.stopPropagation();
-  },
-
   on: function(type, fn, uid){
     vjs.on(this.el_, type, vjs.bind(this, fn));
     return this;
@@ -305,19 +308,25 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
     vjs.trigger(this.el_, type, e);
     return this;
   },
-  // binds event proxies
+  // binds profile events
   bind: function() {
     var player = this.player_;
 
     this.unbind();
 
-    var handlers = this.eventHandlers_;
-    var events = vjs.Tracking.Events;
-    for (var i = events.length - 1; i >= 0; i--) {
-        handlers[events[i]] = vjs.bind(this, function (e) {
-            this.eventHandler.call(this, e);
-        });
-        player.on(events[i], handlers[events[i]]);
+    var handlers = this.eventHandlers_,
+        customHandlers = this.customEventHandlers_,
+        handler;
+
+    var i;
+    for (i = handlers.length - 1; i >= 0; i--) {
+        handler = handlers[i];
+        player.on(handler[0], handler[1]);
+    }
+
+    for (i = customHandlers.length - 1; i >= 0; i--) {
+        handler = customHandlers[i];
+        this.on(handler[0], handler[1]);
     }
 
     // if we missed loadedmetadata
@@ -330,17 +339,20 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
 
     return this;
   },
-  // unbinds event proxies
+  // unbinds profile events
   unbind: function() {
     var player = this.player_;
 
     player.off('loadedmetadata', this.onLoadedmetadata);
 
-    var handlers = this.eventHandlers_;
-    var events = vjs.Tracking.Events;
-    for (var i = events.length - 1; i >= 0; i--) {
-        player.off(events[i], handlers[events[i]]);
+    var handlers = this.eventHandlers_,
+        handler;
+    for (var i = handlers.length - 1; i >= 0; i--) {
+        handler = handlers[i];
+        player.off(handler[0], handler[1]);
     }
+
+    this.off();
 
     return this;
   },
@@ -359,9 +371,9 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
     // merge global context into context object
     var context_ = vjs.obj.merge({}, this.options_.context);
     context = vjs.obj.merge(context_, context);
-    return function(event) {
+    return vjs.bind(this, function(event) {
       this[handleName].call(this, event, context);
-    };
+    });
   }
 
 });
