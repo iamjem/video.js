@@ -134,16 +134,17 @@ goog.exportSymbol('videojs.plugin', vjs.plugin);
 
 goog.exportSymbol('videojs.createTimeRange', vjs.createTimeRange);
 
-goog.exportSymbol('videojs.Tracking', vjs.Tracking);
-goog.exportProperty(vjs.Tracking.prototype, 'addProfiles', vjs.Tracking.prototype.addProfiles);
-goog.exportProperty(vjs.Tracking.prototype, 'removeProfiles', vjs.Tracking.prototype.removeProfiles);
-goog.exportProperty(vjs.Tracking.prototype, 'initProfiles', vjs.Tracking.prototype.initProfiles);
-goog.exportProperty(vjs.Tracking, 'getProfile', vjs.Tracking.getProfile);
-goog.exportProperty(vjs.Tracking, 'registerProfile', vjs.Tracking.registerProfile);
-goog.exportProperty(vjs.Tracking, 'expandTimecode', vjs.Tracking.expandTimecode);
-goog.exportProperty(vjs.Tracking, 'expandPercent', vjs.Tracking.expandPercent);
-goog.exportProperty(vjs.Tracking, 'expandTime', vjs.Tracking.expandTime);
-goog.exportProperty(vjs.Tracking, 'Events', vjs.Tracking.Events);
+goog.exportSymbol('videojs.ConfigPlayer', vjs.ConfigPlayer);
+goog.exportSymbol('videojs.withConfig', vjs.withConfig);
+goog.exportSymbol('videojs.Config', vjs.Config);
+goog.exportProperty(vjs.Config.prototype, 'getById', vjs.Config.prototype.getById);
+goog.exportProperty(vjs.Config.prototype, 'getBySrc', vjs.Config.prototype.getBySrc);
+goog.exportProperty(vjs.Config.prototype, 'getCurrent', vjs.Config.prototype.getCurrent);
+goog.exportProperty(vjs.Config.prototype, 'getCurrentChildren', vjs.Config.prototype.getCurrentChildren);
+goog.exportProperty(vjs.Config.prototype, 'getCurrentConfig', vjs.Config.prototype.getCurrentConfig);
+goog.exportProperty(vjs.Config.prototype, 'loadVideoById', vjs.Config.prototype.loadVideoById);
+goog.exportProperty('videojs.Config.configFactory', vjs.Config.configFactory);
+goog.exportSymbol('videojs.ConfigPosterImage', vjs.ConfigPosterImage);
 
 goog.exportSymbol('videojs.Tracking.TrackingProfile', vjs.Tracking.TrackingProfile);
 goog.exportProperty(vjs.Tracking.TrackingProfile.prototype, 'setupHandlers', vjs.Tracking.TrackingProfile.prototype.setupHandlers);
