@@ -42,7 +42,9 @@ var sourceFiles = [
   "src/js/tracks.js",
   "src/js/json.js",
   "src/js/setup.js",
-  "src/js/plugins.js"
+  "src/js/plugins.js",
+  "src/js/plugins/config.js",
+  "src/js/plugins/tracking.js"
 ];
 
 // Allow overriding the default project root
