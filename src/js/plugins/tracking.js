@@ -400,9 +400,9 @@ vjs.Tracking.TrackingProfile.prototype.options_ = {
 // Omniture profile
 vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
   init: function(player, options){
-    this.delayPlay_ = vjs.bind(this, this.delayPlay_);
+    this.handleDurationchange_ = vjs.bind(this, this.handleDurationchange_);
     this.handlePlay_ = vjs.bind(this, this.handlePlay_);
-    this.trackResume_ = vjs.bind(this, this.trackResume_);
+    this.handleResume_ = vjs.bind(this, this.handleResume_);
     vjs.Tracking.TrackingProfile.prototype.init.call(this, player, options);
   },
 
@@ -416,13 +416,13 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
     return this;
   },
 
-  trackResume_: function(){
-    this.player_.off('timeupdate', this.trackResume_);
+  handleResume_: function(){
+    this.player_.off('timeupdate', this.handleResume_);
     s.Media.play(this.playContext_.title, parseInt(this.player_.currentTime(), 10));
   },
 
-  delayPlay_: function(){
-    this.player_.off('durationchange', this.delayPlay);
+  handleDurationchange_: function(){
+    this.player_.off('durationchange', this.handleDurationchange_);
     this.handlePlay_(this.playContext_);
   },
 
@@ -437,8 +437,8 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
     s.events='';
     // and start tracking video
     this.playing_ = true;
-    s.Media.open(context.title, this.player_.duration(), context.fileName);
-    s.Media.play(context.title, 0);
+    s.Media.open(this.playContext_.title, this.player_.duration(), context.fileName);
+    s.Media.play(this.playContext_.title, 0);
   },
 
   handlePlay: function(event, context) {
@@ -446,15 +446,15 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
     if (!this.playing_) {
       // flash won't have the duration available when playback begins
       if (!this.player_.duration()) {
-        this.player_.on('durationchange', this.delayPlay_);
+        this.player_.on('durationchange', this.handleDurationchange_);
       }
       else {
-        this.handlePlay_(context);
+        this.handlePlay_();
       }
     }
     else {
       // resume
-      this.player_.on('timeupdate', this.trackResume_);
+      this.player_.on('timeupdate', this.handleResume_);
     }
   },
 
@@ -469,7 +469,7 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
     // finish
     this.playing_ = false;
     this.pausedAt_ = null;
-    this.player_.off('timeupdate', this.trackResume_);
+    this.player_.off('timeupdate', this.handleResume_);
     s.Media.stop(context.title, parseInt(this.player_.currentTime(), 10));
     s.Media.close(context.title);
   }
