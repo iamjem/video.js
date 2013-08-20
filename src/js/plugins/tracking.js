@@ -418,7 +418,7 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
 
   handleDurationchange_: function(){
     this.player_.off('durationchange', this.handleDurationchange_);
-    this.handlePlay_(this.playContext_);
+    this.handlePlay_();
   },
 
   handlePlay_: function(context){
