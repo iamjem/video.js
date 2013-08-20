@@ -1,28 +1,46 @@
 vjs.ConfigPlayer = vjs.Player.extend({
   init: function(configFactory, tag, options, ready){
-    this.config_ = configFactory(this);
+    this['config_'] = this.config_ = configFactory(this);
     vjs.Player.prototype.init.call(this, tag, options, ready);
   }
 });
 
+vjs.ConfigPlayer.prototype.config_ = null;
+
 vjs.withConfig = function(options, tag, addOptions, ready) {
-  options = vjs.obj.merge({
-    url: null,
-    data: null,
-    defaultId: null,
-    onPlayer: function(player) {},
-    onData: function(data){return data;},
-    configOptions: {}
-  }, options);
+  var options_ = vjs.obj.merge({}, vjs.withConfig.options_);
+  options = vjs.obj.merge(options_, options);
 
   // ensure minimal addOptions
-  addOptions = vjs.obj.merge({
-    children: {},
-    plugins: {}
-  }, addOptions || {});
+  var addOptions_ = vjs.obj.merge({}, vjs.withConfig.addOptions_);
+  addOptions = vjs.obj.merge(addOptions_, addOptions || {});
 
-  // ajax success callback
-  var success = function(data) {
+  // data was manually passed in
+  if (options.data !== null) {
+    vjs.withConfig.onSuccess(options.data, options, tag, addOptions, ready);
+  }
+  // data requires AJAX get
+  else if (options.url !== null) {
+    vjs.get(options.url, function(responseText){
+      vjs.withConfig.onSuccess(JSON.parse(responseText), options, tag, addOptions, ready);
+    });
+  }
+};
+
+vjs.withConfig.options_ = {
+  url: null,
+  data: null,
+  defaultId: null,
+  onPlayer: function(player) {},
+  onData: function(data){return data;}
+};
+
+vjs.withConfig.addOptions_ = {
+  children: {},
+  plugins: {}
+};
+
+vjs.withConfig.onSuccess = function(data, options, tag, addOptions, ready){
     data = options.onData(data);
 
     // merge global components into addOptions
@@ -36,16 +54,19 @@ vjs.withConfig = function(options, tag, addOptions, ready) {
     }
 
     // merge start video options
-    if (options.defaultId !== null && data.videos) {
-      var videos = data.videos, v;
+    if (options['defaultId'] !== null && data['videos']) {
+      var videos = data['videos'];
+      var defaultId = options['defaultId'];
+      var v;
       for (var i = 0, l = videos.length; i < l; i++) {
         v = videos[i];
-        if (v.id === options.defaultId) {
+        if (v['id'] === defaultId) {
           // remove component data w/o referencing the actual object
           if (v.children) {
             v = vjs.obj.merge({}, v);
             delete v.children;
           }
+
           vjs.obj.merge(addOptions, v);
           break;
         }
@@ -55,23 +76,11 @@ vjs.withConfig = function(options, tag, addOptions, ready) {
     var configFactory = vjs.Config.configFactory({ data: data });
     var player = new vjs.ConfigPlayer(configFactory, tag, addOptions, ready);
     options.onPlayer(player);
-  };
-
-  // data was manually passed in
-  if (options.data !== null) {
-    success(options.data);
-  }
-  // data requires AJAX get
-  else if (options.url !== null) {
-    vjs.get(options.url, function(responseText){
-      success(JSON.parse(responseText));
-    });
-  }
 };
 
 vjs.Config = vjs.CoreObject.extend({
   init: function(player, options) {
-    this.player = player;
+    this.player_ = player;
     this.options_ = vjs.obj.deepMerge(this.options_, options || {});
     this.data = this.options_.data;
     this.buildCache();
@@ -79,23 +88,25 @@ vjs.Config = vjs.CoreObject.extend({
   },
   buildCache: function() {
     // create ID cache
-    var videos = this.data.videos,
-        idCache = this.idCache_ = {},
-        srcCache = this.srcCache_ = {};
-
-    var video,
-        i = 0, l = videos.length,
-        j, k,
-        srcs, src;
+    var videos = this.data['videos'];
+    var idCache = this.idCache_ = {};
+    var srcCache = this.srcCache_ = {};
+    var video;
+    var i = 0;
+    var l = videos.length;
+    var j; 
+    var k;
+    var srcs;
+    var src;
 
     for (; i < l; i++) {
       video = videos[i];
-      if (video.hasOwnProperty('id')) {
-        idCache[video.id] = i;
-        srcs = video.sources;
+      if (video['id']) {
+        idCache[video['id']] = i;
+        srcs = video['sources'];
         if (srcs) {
           for (j = 0, k = srcs.length; j < k; j++) {
-            srcCache[srcs[j].src] = i;
+            srcCache[srcs[j]['src']] = i;
           }
         }
       }
@@ -108,26 +119,28 @@ vjs.Config = vjs.CoreObject.extend({
   },
   // get video data by id
   getById: function(id) {
-    return this.idCache_.hasOwnProperty(id) ? this.data.videos[this.idCache_[id]] : null;
+    return (this.idCache_[id] !== undefined) ? this.data['videos'][this.idCache_[id]] : null;
   },
   // get video data by src, can be a string or src object
   // will search on any format, getById is always faster
   getBySrc: function(src) {
-    src = src.src || src;
-    return this.srcCache_.hasOwnProperty(src) ? this.data.videos[this.srcCache_[src]] : null;
+    src = src['src'] || src;
+    return (this.srcCache_[src] !== undefined) ? this.data['videos'][this.srcCache_[src]] : null;
   },
   // get video data by current playing video
   getCurrent: function() {
-    return this.getBySrc(this.player.currentSrc());
+    return this.getBySrc(this.player_.currentSrc());
   },
 
   getOptions_: function(obj, selector){
-    var selected = obj, prop;
+    var selected = obj;
+    var prop;
+    
     selector = selector.split('.');
 
     for (var i = 0, l = selector.length; i < l; i++) {
       prop = selector[i];
-      if (selected.hasOwnProperty(prop)) {
+      if (selected[prop] !== undefined) {
         selected = selected[prop];
         continue;
       }
@@ -142,16 +155,16 @@ vjs.Config = vjs.CoreObject.extend({
 
   getCurrentChildren: function(selector){
     var curr = this.getCurrent();
-    if (curr !== null && curr.hasOwnProperty('children')) {
-      return (selector) ? this.getOptions_(curr.children, selector) : curr.children;
+    if (curr !== null && curr['children'] !== undefined) {
+      return (selector) ? this.getOptions_(curr['children'], selector) : curr['children'];
     }
     return null;
   },
 
   getCurrentConfig: function(selector){
     var curr = this.getCurrent();
-    if (curr !== null && curr.hasOwnProperty('config')) {
-      return (selector) ? this.getOptions_(curr.config, selector) : curr.config;
+    if (curr !== null && curr['config'] !== undefined) {
+      return (selector) ? this.getOptions_(curr['config'], selector) : curr['config'];
     }
     return null;
   },
@@ -159,7 +172,7 @@ vjs.Config = vjs.CoreObject.extend({
   loadVideoById: function(id){
     var v = this.getById(id);
     if (v !== null && v.sources) {
-      this.player.src(v.sources);
+      this.player_.src(v.sources);
     }
   }
   
@@ -179,7 +192,7 @@ vjs.Config.configFactory = function(options){
 
 // choose the right options based on media queries
 vjs.Config.matchOptions = function(obj) {
-  if (!window.matchMedia || !obj.hasOwnProperty('default')) {
+  if (!window.matchMedia || obj['default'] === undefined) {
     return obj['default'] || obj;
   }
   for (var query in obj) {
