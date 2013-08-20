@@ -53,13 +53,13 @@ vjs.Tracking =  vjs.Component.extend({
 
     for (var i = 0, l = profileData.length; i < l; i++) {
       p = profileData[i];
-      if (p.profileName) {
-        pClass = vjs.Tracking.getProfile(p.profileName);
+      if (p['profileName']) {
+        pClass = vjs.Tracking.getProfile(p['profileName']);
         if (pClass !== undefined) {
           profiles.push(new pClass(player, p));
         }
         else {
-          vjs.log('Could not find profile with name: ' + p.profileName);
+          vjs.log('Could not find profile with name: ' + p['profileName']);
         }
       }
     }
@@ -75,13 +75,12 @@ vjs.Tracking =  vjs.Component.extend({
     var current = player.config_.getCurrent();
     var profiles;
 
-    if (current === null || current.id === this.currId_) {
+    if (current === null || current['id'] === this.currId_) {
         return this;
     }
 
-    this.currId_ = current.id;
+    this.currId_ = current['id'];
     profiles = player.config_.getCurrentConfig('tracking.profiles');
-
     if (profiles !== null) {
       profiles = this.initProfiles(profiles);
       this.addProfiles(profiles);
@@ -158,7 +157,6 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
     this.customEventHandlers_ = {};
 
     this.onLoadedmetadata = vjs.bind(this, this.onLoadedmetadata);
-    this.onFirstPlay = vjs.bind(this, this.onFirstPlay);
     this.onTimeupdate = vjs.bind(this, this.onTimeupdate);
     this.onDispose = vjs.bind(this, this.onDispose);
 
@@ -378,10 +376,6 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
     }
   },
 
-  onFirstPlay: function(){
-    this.hasPlayed_ = true;
-  },
-
   onTimeupdate: function() {
     var curr = Math.round(this.player_.currentTime());
     if (this.lastTimeupdate_ !== curr) {
@@ -400,6 +394,7 @@ vjs.Tracking.TrackingProfile.prototype.options_ = {
 // Omniture profile
 vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
   init: function(player, options){
+    this.namespace = window['s']['Media'];
     this.handleDurationchange_ = vjs.bind(this, this.handleDurationchange_);
     this.handlePlay_ = vjs.bind(this, this.handlePlay_);
     this.handleResume_ = vjs.bind(this, this.handleResume_);
@@ -411,14 +406,14 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
     // if we don't explicitly stop omniture, it will
     // continue making tracking calls after player is gone
     var title = this.options_.context.title;
-    s.Media.stop(title, parseInt(this.player_.currentTime(), 10));
-    s.Media.close(title);
+    this.namespace.stop(title, parseInt(this.player_.currentTime(), 10));
+    this.namespace.close(title);
     return this;
   },
 
   handleResume_: function(){
     this.player_.off('timeupdate', this.handleResume_);
-    s.Media.play(this.playContext_.title, parseInt(this.player_.currentTime(), 10));
+    this.namespace.play(this.playContext_.title, parseInt(this.player_.currentTime(), 10));
   },
 
   handleDurationchange_: function(){
@@ -437,8 +432,8 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
     s.events='';
     // and start tracking video
     this.playing_ = true;
-    s.Media.open(this.playContext_.title, this.player_.duration(), context.fileName);
-    s.Media.play(this.playContext_.title, 0);
+    this.namespace.open(this.playContext_.title, this.player_.duration(), this.playContext_.fileName);
+    this.namespace.play(this.playContext_.title, 0);
   },
 
   handlePlay: function(event, context) {
@@ -461,7 +456,7 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
   handlePause: function(event, context) {
     if (!this.player_.ended()) {
       this.pausedAt_ = parseInt(this.player_.currentTime(), 10);
-      s.Media.stop(context.title, this.pausedAt_);
+      this.namespace.stop(context.title, this.pausedAt_);
     }
   },
 
@@ -470,8 +465,8 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
     this.playing_ = false;
     this.pausedAt_ = null;
     this.player_.off('timeupdate', this.handleResume_);
-    s.Media.stop(context.title, parseInt(this.player_.currentTime(), 10));
-    s.Media.close(context.title);
+    this.namespace.stop(context.title, parseInt(this.player_.currentTime(), 10));
+    this.namespace.close(context.title);
   }
 });
 

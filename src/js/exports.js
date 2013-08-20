@@ -139,7 +139,13 @@ goog.exportSymbol('videojs.plugin', vjs.plugin);
 goog.exportSymbol('videojs.createTimeRange', vjs.createTimeRange);
 
 goog.exportSymbol('videojs.ConfigPlayer', vjs.ConfigPlayer);
+goog.exportProperty(vjs.ConfigPlayer.prototype, 'config_', vjs.ConfigPlayer.prototype.config_);
+
 goog.exportSymbol('videojs.withConfig', vjs.withConfig);
+goog.exportProperty(vjs.withConfig, 'options_', vjs.withConfig.options_);
+goog.exportProperty(vjs.withConfig, 'addOptions_', vjs.withConfig.addOptions_);
+goog.exportProperty(vjs.withConfig, 'onSuccess', vjs.withConfig.onSuccess);
+
 goog.exportSymbol('videojs.Config', vjs.Config);
 goog.exportProperty(vjs.Config.prototype, 'getById', vjs.Config.prototype.getById);
 goog.exportProperty(vjs.Config.prototype, 'getBySrc', vjs.Config.prototype.getBySrc);
@@ -150,11 +156,37 @@ goog.exportProperty(vjs.Config.prototype, 'loadVideoById', vjs.Config.prototype.
 goog.exportProperty('videojs.Config.configFactory', vjs.Config.configFactory);
 goog.exportSymbol('videojs.ConfigPosterImage', vjs.ConfigPosterImage);
 
+goog.exportSymbol('videojs.Tracking', vjs.Tracking);
+goog.exportProperty(vjs.Tracking, 'profiles_', vjs.Tracking.profiles_);
+goog.exportProperty(vjs.Tracking, 'timeRE', vjs.Tracking.timeRE);
+goog.exportProperty(vjs.Tracking, 'getProfile', vjs.Tracking.getProfile);
+goog.exportProperty(vjs.Tracking, 'registerProfile', vjs.Tracking.registerProfile);
+goog.exportProperty(vjs.Tracking, 'expandTimecode', vjs.Tracking.expandTimecode);
+goog.exportProperty(vjs.Tracking, 'expandPercent', vjs.Tracking.expandPercent);
+goog.exportProperty(vjs.Tracking, 'expandTime', vjs.Tracking.expandTime);
+
 goog.exportSymbol('videojs.Tracking.TrackingProfile', vjs.Tracking.TrackingProfile);
 goog.exportProperty(vjs.Tracking.TrackingProfile.prototype, 'setupHandlers', vjs.Tracking.TrackingProfile.prototype.setupHandlers);
 goog.exportProperty(vjs.Tracking.TrackingProfile.prototype, 'setupTimeupdates', vjs.Tracking.TrackingProfile.prototype.setupTimeupdates);
 goog.exportProperty(vjs.Tracking.TrackingProfile.prototype, 'bindHandler', vjs.Tracking.TrackingProfile.prototype.bindHandler);
+goog.exportProperty(vjs.Tracking.TrackingProfile.prototype, 'bind', vjs.Tracking.TrackingProfile.prototype.bind);
+goog.exportProperty(vjs.Tracking.TrackingProfile.prototype, 'unbind', vjs.Tracking.TrackingProfile.prototype.unbind);
+goog.exportProperty(vjs.Tracking.TrackingProfile.prototype, 'on', vjs.Tracking.TrackingProfile.prototype.on);
+goog.exportProperty(vjs.Tracking.TrackingProfile.prototype, 'off', vjs.Tracking.TrackingProfile.prototype.off);
+goog.exportProperty(vjs.Tracking.TrackingProfile.prototype, 'trigger', vjs.Tracking.TrackingProfile.prototype.trigger);
+goog.exportProperty(vjs.Tracking.TrackingProfile.prototype, 'onDispose', vjs.Tracking.TrackingProfile.prototype.onDispose);
+goog.exportProperty(vjs.Tracking.TrackingProfile.prototype, 'onLoadedmetadata', vjs.Tracking.TrackingProfile.prototype.onLoadedmetadata);
+goog.exportProperty(vjs.Tracking.TrackingProfile.prototype, 'onTimeupdate', vjs.Tracking.TrackingProfile.prototype.onTimeupdate);
 
-goog.exportSymbol('videojs.OmnitureTrackingProfile', vjs.OmnitureTrackingProfile);
-goog.exportSymbol('videojs.WebtrendsTrackingProfile', vjs.WebtrendsTrackingProfile);
+goog.exportSymbol('videojs.Tracking.OmnitureTrackingProfile', vjs.Tracking.OmnitureTrackingProfile);
+goog.exportProperty(vjs.Tracking.OmnitureTrackingProfile.prototype, 'handlePlay', vjs.Tracking.OmnitureTrackingProfile.prototype.handlePlay);
+goog.exportProperty(vjs.Tracking.OmnitureTrackingProfile.prototype, 'handlePause', vjs.Tracking.OmnitureTrackingProfile.prototype.handlePause);
+goog.exportProperty(vjs.Tracking.OmnitureTrackingProfile.prototype, 'handleEnded', vjs.Tracking.OmnitureTrackingProfile.prototype.handleEnded);
+
+goog.exportSymbol('videojs.Tracking.WebtrendsTrackingProfile', vjs.Tracking.WebtrendsTrackingProfile);
+goog.exportProperty(vjs.Tracking.WebtrendsTrackingProfile.prototype, 'handlePlay', vjs.Tracking.WebtrendsTrackingProfile.prototype.handlePlay);
+goog.exportProperty(vjs.Tracking.WebtrendsTrackingProfile.prototype, 'handleEnded', vjs.Tracking.WebtrendsTrackingProfile.prototype.handleEnded);
+
 goog.exportSymbol('videojs.GATrackingProfile', vjs.GATrackingProfile);
+goog.exportProperty(vjs.Tracking.GATrackingProfile.prototype, 'handlePlay', vjs.Tracking.GATrackingProfile.prototype.handlePlay);
+goog.exportProperty(vjs.Tracking.GATrackingProfile.prototype, 'handleEnded', vjs.Tracking.GATrackingProfile.prototype.handleEnded);
