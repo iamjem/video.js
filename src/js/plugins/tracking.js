@@ -29,14 +29,14 @@ vjs.Tracking =  vjs.Component.extend({
     if (global === undefined) {
       profiles = this.activeProfiles_;
       for (var i = 0, l = profiles.length; i < l; i++) {
-        profiles[i].dispose();
+        profiles[i].onDispose();
       }
       this.activeProfiles_ = [];
     }
     else {
       profiles = this.globalProfiles_;
       for (var i = 0, l = profiles.length; i < l; i++) {
-        profiles[i].dispose();
+        profiles[i].onDispose();
       }
       this.globalProfiles_ = [];
     }
@@ -401,8 +401,8 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
     vjs.Tracking.TrackingProfile.prototype.init.call(this, player, options);
   },
 
-  dispose: function() {
-    vjs.Tracking.TrackingProfile.prototype.dispose.call(this);
+  onDispose: function() {
+    vjs.Tracking.TrackingProfile.prototype.onDispose.call(this);
     // if we don't explicitly stop omniture, it will
     // continue making tracking calls after player is gone
     var title = this.options_.context.title;
