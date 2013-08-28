@@ -130,8 +130,10 @@ test('should get the right style values for an element', function(){
   el.style.height = '100%';
   el.style.width = '123px';
 
-  ok(vjs.getComputedDimension(el, 'height') === '1000px');
-  ok(vjs.getComputedDimension(el, 'width') === '123px');
+  // integer px values may get translated int very-close floats in Chrome/OS X
+  // so round the dimensions to ignore this
+  equal(Math.round(parseFloat(vjs.getComputedDimension(el, 'height'))), 1000, 'the computed height is equal');
+  equal(Math.round(parseFloat(vjs.getComputedDimension(el, 'width'))), 123, 'the computed width is equal');
 });
 
 test('should insert an element first in another', function(){
@@ -190,6 +192,14 @@ test('should format time as a string', function(){
   // Don't do extra leading zeros for hours
   ok(vjs.formatTime(1,36000) === '0:00:01');
   ok(vjs.formatTime(1,360000) === '0:00:01');
+});
+
+test('should format invalid times as dashes', function(){
+  equal(vjs.formatTime(Infinity, 90), '-:-');
+  equal(vjs.formatTime(NaN), '-:-');
+  // equal(vjs.formatTime(NaN, 216000), '-:--:--');
+  equal(vjs.formatTime(10, Infinity), '0:00:10');
+  equal(vjs.formatTime(90, NaN), '1:30');
 });
 
 test('should create a fake timerange', function(){
