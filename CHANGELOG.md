@@ -9,6 +9,15 @@ CHANGELOG
 * Exported createItems() for custom menus ([view](https://github.com/videojs/video.js/pull/654))
 * Preventing media events from bubbling up the DOM ([view](https://github.com/videojs/video.js/pull/630))
 * Major reworking of the control bar and many issues fixed ([view](https://github.com/videojs/video.js/pull/672))
+* Fixed an issue with minifiying the code on Windows systems ([view](https://github.com/videojs/video.js/pull/683))
+* Added support for RTMP streaming through Flash ([view](https://github.com/videojs/video.js/pull/605))
+* Made tech.features available to external techs ([view](https://github.com/videojs/video.js/pull/705))
+* Minor code improvements ([view](https://github.com/videojs/video.js/pull/706))
+* Updated time formatting to support NaN and Infinity ([view](https://github.com/videojs/video.js/pull/627))
+* Fixed an `undefined` error in cases where no tech is loaded ([view](https://github.com/videojs/video.js/pull/632))
+* Exported addClass and removeClass for player components ([view](https://github.com/videojs/video.js/pull/661))
+* Made the fallback message customizable ([view](https://github.com/videojs/video.js/pull/638))
+* Fixed an issue with the loading spinner placement and rotation ([view](https://github.com/videojs/video.js/pull/694))
 
 --------------------
 
