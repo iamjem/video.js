@@ -175,7 +175,7 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
   },
   
   parseEvents: function(){
-    var events = this.options_.events;
+    var events = this.options_['events'];
     var safeEvents = {};
     var timeEvents = this.timeEvents_ = {};
 
@@ -347,7 +347,7 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
   // wraps handlers, passes them the event and context
   bindHandler: function(handleName, context) {
     // merge global context into context object
-    var context_ = vjs.obj.merge({}, this.options_.context);
+    var context_ = vjs.obj.merge({}, this.options_['context']);
     context = vjs.obj.merge(context_, context);
     return vjs.bind(this, function(event) {
       this[handleName].call(this, event, context);
@@ -386,10 +386,9 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
 
 });
 
-vjs.Tracking.TrackingProfile.prototype.options_ = {
-  context: {},
-  events: {}
-};
+vjs.Tracking.TrackingProfile.prototype.options_ = {};
+vjs.Tracking.TrackingProfile.prototype.options_['context'] = {};
+vjs.Tracking.TrackingProfile.prototype.options_['events'] = {};
 
 // Omniture profile
 vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
@@ -470,13 +469,12 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
   }
 });
 
-vjs.Tracking.OmnitureTrackingProfile.prototype.options_ = {
-  events: {
-    play: {},
-    pause: {},
-    ended: {}
-  }
-};
+vjs.Tracking.OmnitureTrackingProfile.prototype.options_ = {};
+vjs.Tracking.OmnitureTrackingProfile.prototype.options_['events'] = {};
+vjs.Tracking.OmnitureTrackingProfile.prototype.options_['events']['play'] = {};
+vjs.Tracking.OmnitureTrackingProfile.prototype.options_['events']['pause'] = {};
+vjs.Tracking.OmnitureTrackingProfile.prototype.options_['events']['ended'] = {};
+
 
 vjs.Tracking.registerProfile('omniture15', vjs.Tracking.OmnitureTrackingProfile);
 
