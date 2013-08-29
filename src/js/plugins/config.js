@@ -16,41 +16,41 @@ vjs.withConfig = function(options, tag, addOptions, ready) {
   addOptions = vjs.obj.merge(addOptions_, addOptions || {});
 
   // data was manually passed in
-  if (options.data !== null) {
-    vjs.withConfig.onSuccess(options.data, options, tag, addOptions, ready);
+  if (options['data'] !== null) {
+    vjs.withConfig.onSuccess(options['data'], options, tag, addOptions, ready);
   }
   // data requires AJAX get
-  else if (options.url !== null) {
-    vjs.get(options.url, function(responseText){
+  else if (options['url'] !== null) {
+    vjs.get(options['url'], function(responseText){
       vjs.withConfig.onSuccess(JSON.parse(responseText), options, tag, addOptions, ready);
     });
   }
 };
 
 vjs.withConfig.options_ = {
-  url: null,
-  data: null,
-  defaultId: null,
-  onPlayer: function(player) {},
-  onData: function(data){return data;}
+  'url': null,
+  'data': null,
+  'defaultId': null,
+  'onPlayer': function(player) {},
+  'onData': function(data){return data;}
 };
 
 vjs.withConfig.addOptions_ = {
-  children: {},
-  plugins: {}
+  'children': {},
+  'plugins': {}
 };
 
 vjs.withConfig.onSuccess = function(data, options, tag, addOptions, ready){
-    data = options.onData(data);
+    data = options['onData'](data);
 
     // merge global components into addOptions
     if (data.children) {
-      vjs.obj.merge(addOptions.children, vjs.Config.matchOptions(data.children));
+      vjs.obj.merge(addOptions['children'], vjs.Config.matchOptions(data['children']));
     }
 
     // merge global plugins into addOptions
     if (data.plugins) {
-      vjs.obj.merge(addOptions.plugins, vjs.Config.matchOptions(data.plugins));
+      vjs.obj.merge(addOptions['plugins'], vjs.Config.matchOptions(data['plugins']));
     }
 
     // merge start video options
@@ -75,14 +75,14 @@ vjs.withConfig.onSuccess = function(data, options, tag, addOptions, ready){
 
     var configFactory = vjs.Config.configFactory({ data: data });
     var player = new vjs.ConfigPlayer(configFactory, tag, addOptions, ready);
-    options.onPlayer(player);
+    options['onPlayer'](player);
 };
 
 vjs.Config = vjs.CoreObject.extend({
   init: function(player, options) {
     this.player_ = player;
     this.options_ = vjs.obj.deepMerge(this.options_, options || {});
-    this.data = this.options_.data;
+    this.data = this.options_['data'];
     this.buildCache();
     return this;
   },
@@ -171,8 +171,8 @@ vjs.Config = vjs.CoreObject.extend({
 
   loadVideoById: function(id){
     var v = this.getById(id);
-    if (v !== null && v.sources) {
-      this.player_.src(v.sources);
+    if (v !== null && v['sources']) {
+      this.player_.src(v['sources']);
     }
   }
   
@@ -218,8 +218,8 @@ vjs.ConfigPosterImage = vjs.PosterImage.extend({
 
   onLoadstart: function(){
     var config = this.player.config_.getCurrent();
-    if (config !== null && config.poster && config.poster !== this.el.getAttribute('src')) {
-      this.el.setAttribute('src', config.poster);
+    if (config !== null && config['poster'] && config['poster'] !== this.el.getAttribute('src')) {
+      this.el.setAttribute('src', config['poster']);
     }
   },
 
