@@ -3,7 +3,9 @@
  */
 
 // HTML5 Shiv. Must be in <head> to support older browsers.
-document.createElement('video');document.createElement('audio');
+document.createElement('video');
+document.createElement('audio');
+document.createElement('track');
 
 /**
  * Doubles as the main function for users to create a player instance and also
@@ -87,7 +89,13 @@ vjs.options = {
     'loadingSpinner': {},
     'bigPlayButton': {},
     'controlBar': {}
-  }
+  },
+
+  // Default message to show when a video cannot be played.
+  'notSupportedMessage': 'Sorry, no compatible source and playback ' +
+      'technology were found for this video. Try using another browser ' +
+      'like <a href="http://bit.ly/ccMUEC">Chrome</a> or download the ' +
+      'latest <a href="http://adobe.ly/mwfN1">Adobe Flash Player</a>.'
 };
 
 // Set CDN Version of swf

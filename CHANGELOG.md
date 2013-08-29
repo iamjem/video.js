@@ -2,6 +2,26 @@ CHANGELOG
 =========
 
 ## Unreleased (HEAD)
+* Added LESS as a CSS preprocessor for the default skin ([view](https://github.com/videojs/video.js/pull/644))
+* Exported MenuButtons for use in the API ([view](https://github.com/videojs/video.js/pull/648))
+* Fixed ability to remove listeners added with one() ([view](https://github.com/videojs/video.js/pull/659))
+* Updated buffered() to account for multiple loaded ranges ([view](https://github.com/videojs/video.js/pull/643))
+* Exported createItems() for custom menus ([view](https://github.com/videojs/video.js/pull/654))
+* Preventing media events from bubbling up the DOM ([view](https://github.com/videojs/video.js/pull/630))
+* Major reworking of the control bar and many issues fixed ([view](https://github.com/videojs/video.js/pull/672))
+* Fixed an issue with minifiying the code on Windows systems ([view](https://github.com/videojs/video.js/pull/683))
+* Added support for RTMP streaming through Flash ([view](https://github.com/videojs/video.js/pull/605))
+* Made tech.features available to external techs ([view](https://github.com/videojs/video.js/pull/705))
+* Minor code improvements ([view](https://github.com/videojs/video.js/pull/706))
+* Updated time formatting to support NaN and Infinity ([view](https://github.com/videojs/video.js/pull/627))
+* Fixed an `undefined` error in cases where no tech is loaded ([view](https://github.com/videojs/video.js/pull/632))
+* Exported addClass and removeClass for player components ([view](https://github.com/videojs/video.js/pull/661))
+* Made the fallback message customizable ([view](https://github.com/videojs/video.js/pull/638))
+* Fixed an issue with the loading spinner placement and rotation ([view](https://github.com/videojs/video.js/pull/694))
+
+--------------------
+
+## 4.1.0 (2013-06-28)
 * Turned on method queuing for unready playback technologies (flash) [view](https://github.com/videojs/video.js/pull/553)
 * Blocking user text selection on player components [view](https://github.com/videojs/video.js/pull/524)
 * Exported requestFullScreen() and cancelFullScreen() in the minified version [view](https://github.com/videojs/video.js/pull/555)
@@ -11,8 +31,8 @@ CHANGELOG
 * Fixed an IE poster error when autoplaying ([view](https://github.com/videojs/video.js/pull/593))
 * Exported bufferedPercent for the API ([view](https://github.com/videojs/video.js/pull/588))
 * Augmented user agent detection, specifically for Android versions ([view](https://github.com/videojs/video.js/pull/470))
-
---------------------
+* Fixed IE9 canPlayType error ([view](https://github.com/videojs/video.js/pull/606))
+* Fixed various issues with captions ([view](https://github.com/videojs/video.js/pull/609))
 
 ## 4.0.4 (2013-06-11)
 * Added google analytics to current CDN version. ([view](https://github.com/videojs/video.js/pull/571))
