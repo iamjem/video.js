@@ -432,6 +432,7 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
     // and start tracking video
     this.playing_ = true;
     this.namespace.open(this.playContext_['title'], this.player_.duration(), this.playContext_['fileName']);
+    this.opened_ = true;
     this.namespace.play(this.playContext_['title'], 0);
   },
 
@@ -461,11 +462,14 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
 
   handleEnded: function(event, context) {
     // finish
-    this.playing_ = false;
-    this.pausedAt_ = null;
-    this.player_.off('timeupdate', this.handleResume_);
-    this.namespace.stop(context['title'], parseInt(this.player_.currentTime(), 10));
-    this.namespace.close(context['title']);
+    if (this.opened_) {
+      this.opened_ = false;
+      this.playing_ = false;
+      this.pausedAt_ = null;
+      this.player_.off('timeupdate', this.handleResume_);
+      this.namespace.stop(context['title'], parseInt(this.player_.currentTime(), 10));
+      this.namespace.close(context['title']);
+    }
   }
 });
 
