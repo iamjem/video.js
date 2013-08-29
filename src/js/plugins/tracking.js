@@ -404,7 +404,7 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
     vjs.Tracking.TrackingProfile.prototype.onDispose.call(this);
     // if we don't explicitly stop omniture, it will
     // continue making tracking calls after player is gone
-    var title = this.options_.context['title'];
+    var title = this.options_['context']['title'];
     this.namespace.stop(title, parseInt(this.player_.currentTime(), 10));
     this.namespace.close(title);
     return this;
@@ -420,7 +420,7 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
     this.handlePlay_();
   },
 
-  handlePlay_: function(context){
+  handlePlay_: function(){
     // reset omniture
     var s=s_gi(s_account);
     s.linkTrackVars = 'None';
