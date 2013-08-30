@@ -427,7 +427,7 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
     s.linkTrackEvents = 'None';
     s.linkTrackVars='prop1,prop4,prop5,prop9,prop10,prop16,prop17,prop18,prop19,prop20,prop21,prop22,eVar1,eVar4,eVar5,eVar9,eVar10,eVar16,eVar17,eVar18,eVar19,eVar20,eVar21,eVar22,events';
     s.linkTrackEvents='event1,event2,event3,event4,event5,event9,event14,event15';
-    s.prop1=s.prop4=s.prop5=s.prop9=s.prop10=s.prop16=s.prop17=s.prop18=s.prop19=s.prop20=s.prop21=s.prop22=s.eVar1=s.eVar4=s.eVar5=s.eVar9=s.eVar10=s.eVar16=s.eVar17=s.eVar18=s.eVar19=s.eVar20=s.eVar21=s.eVar22='';
+    s['prop1']=s['prop4']=s['prop5']=s['prop9']=s['prop10']=s['prop16']=s['prop17']=s['prop18']=s['prop19']=s['prop20']=s['prop21']=s['prop22']=s['eVar1']=s['eVar4']=s['eVar5']=s['eVar9']=s['eVar10']=s['eVar16']=s['eVar17']=s['eVar18']=s['eVar19']=s['eVar20']=s['eVar21']=s['eVar22']='';
     s.events='';
     // and start tracking video
     this.playing_ = true;
