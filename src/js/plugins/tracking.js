@@ -422,7 +422,7 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
 
   handlePlay_: function(){
     // reset omniture
-    var s=s_gi(s_account);
+    var s=window['s_gi'](window['s_account']);
     s.linkTrackVars = 'None';
     s.linkTrackEvents = 'None';
     s.linkTrackVars='prop1,prop4,prop5,prop9,prop10,prop16,prop17,prop18,prop19,prop20,prop21,prop22,eVar1,eVar4,eVar5,eVar9,eVar10,eVar16,eVar17,eVar18,eVar19,eVar20,eVar21,eVar22,events';
