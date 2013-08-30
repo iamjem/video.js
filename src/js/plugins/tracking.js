@@ -405,14 +405,14 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
     // if we don't explicitly stop omniture, it will
     // continue making tracking calls after player is gone
     var title = this.options_['context']['title'];
-    this.namespace.stop(title, parseInt(this.player_.currentTime(), 10));
-    this.namespace.close(title);
+    this.namespace['stop'](title, parseInt(this.player_.currentTime(), 10));
+    this.namespace['close'](title);
     return this;
   },
 
   handleResume_: function(){
     this.player_.off('timeupdate', this.handleResume_);
-    this.namespace.play(this.playContext_['title'], parseInt(this.player_.currentTime(), 10));
+    this.namespace['play'](this.playContext_['title'], parseInt(this.player_.currentTime(), 10));
   },
 
   handleDurationchange_: function(){
@@ -431,9 +431,9 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
     s.events='';
     // and start tracking video
     this.playing_ = true;
-    this.namespace.open(this.playContext_['title'], this.player_.duration(), this.playContext_['fileName']);
+    this.namespace['open'](this.playContext_['title'], this.player_.duration(), this.playContext_['fileName']);
     this.opened_ = true;
-    this.namespace.play(this.playContext_['title'], 0);
+    this.namespace['play'](this.playContext_['title'], 0);
   },
 
   handlePlay: function(event, context) {
@@ -456,7 +456,7 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
   handlePause: function(event, context) {
     if (!this.player_.ended()) {
       this.pausedAt_ = parseInt(this.player_.currentTime(), 10);
-      this.namespace.stop(context['title'], this.pausedAt_);
+      this.namespace['stop'](context['title'], this.pausedAt_);
     }
   },
 
@@ -467,8 +467,8 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
       this.playing_ = false;
       this.pausedAt_ = null;
       this.player_.off('timeupdate', this.handleResume_);
-      this.namespace.stop(context['title'], parseInt(this.player_.currentTime(), 10));
-      this.namespace.close(context['title']);
+      this.namespace['stop'](context['title'], parseInt(this.player_.currentTime(), 10));
+      this.namespace['close'](context['title']);
     }
   }
 });
@@ -484,23 +484,27 @@ vjs.Tracking.registerProfile('omniture15', vjs.Tracking.OmnitureTrackingProfile)
 
 // webtrends profile
 vjs.Tracking.WebtrendsTrackingProfile = vjs.Tracking.TrackingProfile.extend({
+  getNamespace: function() {
+    return window['dcsMultiTrack'];
+  },
+
   handlePlay: function(event, context) {
     if (!this.playing_) {
       this.playing_ = true;
-      dcsMultiTrack.apply(null, context['args']);
+      this.getNamespace().apply(null, context['args']);
     }
   },
 
   handleEnded: function(event, context) {
     this.playing_ = false;
-    dcsMultiTrack.apply(null, context['args']);
+    this.getNamespace().apply(null, context['args']);
   }
 });
 
 vjs.Tracking.WebtrendsTrackingProfile.prototype.options_ = {
   events: {
-    play: {},
-    ended: {}
+    'play': {},
+    'ended': {}
   }
 };
 
