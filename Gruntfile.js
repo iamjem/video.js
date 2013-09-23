@@ -118,6 +118,19 @@ module.exports = function(grunt) {
           'build/files/video-js.css': 'src/css/video-js.less'
         }
       }
+    },
+    karma: {
+      options: {
+        configFile: 'test/karma.conf.js'
+      },
+      dev: {
+        configFile: 'test/karma.conf.js',
+        autoWatch: true
+      },
+      ci: {
+        configFile: 'test/karma.conf.js',
+        autoWatch: false
+      }
     }
   });
 
@@ -130,6 +143,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-s3');
   grunt.loadNpmTasks('contribflow');
+  grunt.loadNpmTasks('grunt-karma');
 
   // Default task.
   grunt.registerTask('default', ['jshint', 'less', 'build', 'minify', 'dist']);
@@ -210,7 +224,8 @@ module.exports = function(grunt) {
                 + ' --js_output_file=' + dest
                 + ' --create_source_map ' + dest + '.map --source_map_format=V3'
                 + ' --jscomp_warning=checkTypes --warning_level=VERBOSE'
-                + ' --output_wrapper "/*! Video.js v' + version.full + ' ' + pkg.copyright + ' */ (function() {%output%})();//@ sourceMappingURL=video.js.map"';
+                + ' --output_wrapper "/*! Video.js v' + version.full + ' ' + pkg.copyright + ' */ (function() {%output%})();"';
+                //@ sourceMappingURL=video.js.map
 
     // Add each js file
     grunt.file.expand(filePatterns).forEach(function(file){
