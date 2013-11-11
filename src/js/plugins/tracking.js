@@ -146,8 +146,8 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
   init: function(player, options) {
     this.player_ = player;
 
-    this.options_ = vjs.obj.copy(this.options_);
-    options = vjs.Component.prototype.options.call(this, options);
+    this.options_ = this['getOptions']();
+    vjs.Component.prototype.options.call(this, options);
 
     this.lastTimeupdate_ = null;
     this.hasPlayed_ = false;
@@ -172,6 +172,13 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
     }
 
     return this;
+  },
+
+  getOptions: function(){
+    return {
+      'context': {},
+      'events': {}
+    };
   },
   
   parseEvents: function(){
@@ -210,7 +217,7 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
       ucType = vjs.capitalize(type);
       for (i = 0, l = contexts.length; i < l; i++) {
         c = contexts[i];
-        handleName = c.handleName && this[c.handleName] ? c.handleName :
+        handleName = c['handleName'] && this[c['handleName']] ? c['handleName'] :
                      this['handle' + ucType] ? 'handle' + ucType :
                      null;
         if (handleName === null) {
@@ -386,9 +393,6 @@ vjs.Tracking.TrackingProfile = vjs.CoreObject.extend({
 
 });
 
-vjs.Tracking.TrackingProfile.prototype.options_ = {};
-vjs.Tracking.TrackingProfile.prototype.options_['context'] = {};
-vjs.Tracking.TrackingProfile.prototype.options_['events'] = {};
 
 // Omniture profile
 vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
@@ -398,6 +402,19 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
     this.handlePlay_ = vjs.bind(this, this.handlePlay_);
     this.handleResume_ = vjs.bind(this, this.handleResume_);
     vjs.Tracking.TrackingProfile.prototype.init.call(this, player, options);
+  },
+
+  getOptions: function(){
+    var options = vjs.Tracking.TrackingProfile.prototype.getOptions.call(this);
+    vjs.obj.merge(options, {
+      'events': {
+        'play': {},
+        'pause': {},
+        'ended': {}
+      }
+    });
+
+    return options;
   },
 
   onDispose: function() {
@@ -473,17 +490,23 @@ vjs.Tracking.OmnitureTrackingProfile = vjs.Tracking.TrackingProfile.extend({
   }
 });
 
-vjs.Tracking.OmnitureTrackingProfile.prototype.options_ = {};
-vjs.Tracking.OmnitureTrackingProfile.prototype.options_['events'] = {};
-vjs.Tracking.OmnitureTrackingProfile.prototype.options_['events']['play'] = {};
-vjs.Tracking.OmnitureTrackingProfile.prototype.options_['events']['pause'] = {};
-vjs.Tracking.OmnitureTrackingProfile.prototype.options_['events']['ended'] = {};
-
 
 vjs.Tracking.registerProfile('omniture15', vjs.Tracking.OmnitureTrackingProfile);
 
 // webtrends profile
 vjs.Tracking.WebtrendsTrackingProfile = vjs.Tracking.TrackingProfile.extend({
+  getOptions: function(){
+    var options = vjs.Tracking.TrackingProfile.prototype.getOptions.call(this);
+    vjs.obj.merge(options, {
+      'events': {
+        'play': {},
+        'ended': {}
+      }
+    });
+
+    return options;
+  },
+
   getNamespace: function() {
     return window['dcsMultiTrack'];
   },
@@ -501,17 +524,23 @@ vjs.Tracking.WebtrendsTrackingProfile = vjs.Tracking.TrackingProfile.extend({
   }
 });
 
-vjs.Tracking.WebtrendsTrackingProfile.prototype.options_ = {
-  events: {
-    'play': {},
-    'ended': {}
-  }
-};
 
 vjs.Tracking.registerProfile('webtrends', vjs.Tracking.WebtrendsTrackingProfile);
 
 // Google analytics profile
 vjs.Tracking.GATrackingProfile = vjs.Tracking.TrackingProfile.extend({
+  getOptions: function(){
+    var options = vjs.Tracking.TrackingProfile.prototype.getOptions.call(this);
+    vjs.obj.merge(options, {
+      'events': {
+        'play': {},
+        'ended': {}
+      }
+    });
+
+    return options;
+  },
+
   getNamespace: function() {
     return window['_gaq'] || (window['_gaq'] = []);
   },
@@ -529,11 +558,5 @@ vjs.Tracking.GATrackingProfile = vjs.Tracking.TrackingProfile.extend({
   }
 });
 
-vjs.Tracking.GATrackingProfile.prototype.options_ = {
-  events: {
-    play: {},
-    ended: {}
-  }
-};
 
 vjs.Tracking.registerProfile('ga', vjs.Tracking.GATrackingProfile);
